@@ -3,6 +3,7 @@ import time
 import random
 import dotenv
 import asyncio
+import traceback
 
 dotenv.load_dotenv()
 
@@ -17,29 +18,41 @@ async def on_ready():
     print("=======================================")
 
 
-@bot.command()
-async def dankie(ctx):
-
-    await ctx.send("You Need To Cry Dude .....")
-
-    Continue = True
-    while Continue:
-        await ctx.send("pls highlow")
-        message = await bot.wait_for(
-            "message", check=lambda m: m.author == 270904126974590976
-        )
-
-        print(message.content)
-
-        await message.components[0].children[random.randint(0, 3)].click()
-
-        Continue = False
-
-
 @bot.event
 async def on_message(message):
     if message.author.id == 270904126974590976:
-        print(message.content)
+        try:
+
+            if message.embeds:
+
+                if (
+                    hasattr(message.embeds[0].author, "name")
+                    and "SOHAM's high-low game".lower()
+                    in message.embeds[0].author.name.lower()
+                ):
+                    if message.components:
+                        await message.components[0].children[
+                            random.randint(0, 2)
+                        ].click()
+                        print("[ + ] Played High Low Game")
+
+                elif (
+                    hasattr(message.embeds[0], "description")
+                    and "**Where do you want to search?**".lower()
+                    in message.embeds[0].description.split("\n")[0].lower()
+                ):
+                    if message.components:
+                        await message.components[0].children[
+                            random.randint(0, 2)
+                        ].click()
+                        print("[ + ] Played Search Game")
+
+        except Exception as e:
+            print("[ - ] Error With Message Loading")
+            print("\n", e)
+
+            if message.embeds:
+                print(message.embeds[0].to_dict())
 
     await bot.process_commands(message)
 
